@@ -10,12 +10,12 @@ static void GLClearAllErrors() {
     }
 }
 
-static bool GLCheckErrorStatus() {
+static bool GLCheckErrorStatus(const char* function, int line) {
     while(GLenum error = glGetError()) {
-        std::cout << "OpenGL Error: " << error << std::endl;
+        std::cout << "OpenGL Error: " << error << "\tLine: " << line << "\tfunction: " << function << std::endl;
         return true;
     }
     return false;
 }
 
-#define glCheck(x) GLClearAllErrors(); x; GLCheckErrorStatus();
+#define glCheck(x) GLClearAllErrors(); x; GLCheckErrorStatus(#x, __LINE__);

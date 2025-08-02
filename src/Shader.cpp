@@ -18,14 +18,14 @@ Shader::Shader(const std::string& vsFilePath, const std::string& fsFilePath)
     CheckForErrors(fragmentShader, "FRAGMENT");
 
     m_shaderProgram = glCreateProgram();
-    glAttachShader(m_shaderProgram, vertexShader);
-    glAttachShader(m_shaderProgram, fragmentShader);
-    glLinkProgram(m_shaderProgram);
+    glCheck(glAttachShader(m_shaderProgram, vertexShader);)
+    glCheck(glAttachShader(m_shaderProgram, fragmentShader);)
+    glCheck(glLinkProgram(m_shaderProgram);)
 
     CheckForErrors(m_shaderProgram, "PROGRAM");
 
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    glCheck(glDeleteShader(vertexShader);)
+    glCheck(glDeleteShader(fragmentShader);)
 }
 
 void Shader::Use()

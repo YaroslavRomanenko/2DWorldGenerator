@@ -10,6 +10,7 @@
 
 #include "SandBox.h"
 #include "Shader.h"
+#include "ErrorHandler.h"
 
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 600;
@@ -59,15 +60,16 @@ int main() {
         sandBox.GetShaderRef().Use();
 
         glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f, 0.0f));
         model = glm::rotate(model, glm::radians(20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        model = glm::scale(model, glm::vec3(400.0f, 200.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(50.0f, 50.0f, 1.0f));
         sandBox.GetShaderRef().SetMat4("model", model);
 
         glm::mat4 view = glm::mat4(1.0f);
         sandBox.GetShaderRef().SetMat4("view", view);
 
-        glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WINDOW_WIDTH), 0.0f, static_cast<float>(WINDOW_HEIGHT), 0.1f, 100.0f);
-        sandBox.GetShaderRef().SetMat4("projection", projection);
+        glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WINDOW_WIDTH), 0.0f, static_cast<float>(WINDOW_HEIGHT), -1.0f, 1.0f);
+        glCheck(sandBox.GetShaderRef().SetMat4("projection", projection);)
 
         sandBox.GetRectRef().SetColor(glm::vec4(colors, 1.0f));
         sandBox.Draw();
