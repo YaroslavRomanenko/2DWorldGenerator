@@ -12,8 +12,6 @@
 #include "Shader.h"
 #include "ErrorHandler.h"
 
-const unsigned int WINDOW_WIDTH = 800;
-const unsigned int WINDOW_HEIGHT = 600;
 const std::string TITLE = "OpenGLSandBox";
 
 void FrameBufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -57,21 +55,6 @@ int main() {
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        sandBox.GetShaderRef().Use();
-
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f, 0.0f));
-        model = glm::rotate(model, glm::radians(20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        model = glm::scale(model, glm::vec3(50.0f, 50.0f, 1.0f));
-        sandBox.GetShaderRef().SetMat4("model", model);
-
-        glm::mat4 view = glm::mat4(1.0f);
-        sandBox.GetShaderRef().SetMat4("view", view);
-
-        glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WINDOW_WIDTH), 0.0f, static_cast<float>(WINDOW_HEIGHT), -1.0f, 1.0f);
-        glCheck(sandBox.GetShaderRef().SetMat4("projection", projection);)
-
-        sandBox.GetRectRef().SetColor(glm::vec4(colors, 1.0f));
         sandBox.Draw();
         
         glfwSwapBuffers(window);
