@@ -2,28 +2,67 @@
 
 #include <exception>
 
+unsigned int PIXEL_SIZE = 256; // temp
 
 SandBox::SandBox()
-    :  m_shader("../res/shaders/rect.vs", "../res/shaders/rect.fs"), m_rect(glm::vec2(0.0f, 0.0f), 0.5f, 0.5f, m_shader)
+    :  m_shader("../res/shaders/rect.vs", "../res/shaders/rect.fs"), m_rect(glm::vec2(10.0f, 10.0f), 20.0f, 20.0f, m_shader),
+    m_pixelVertices(CreatePixelData()), m_pixelBatchRenderer(m_pixelVertices)
+{
+    char buffer[FILENAME_MAX];
+    if (getcwd(buffer, sizeof(buffer)) != NULL) {
+        std::cout << "Current working directory:" << buffer << std::endl;
+    }
+    else {
+        std::cerr << "getcwd() error, cannot figure out the current working directory!";
+    }
+
+    // pixelsMatrix.reserve(PIXEL_SIZE);
+    // for (int y = 0; y < PIXEL_SIZE; y++) {
+    //     pixelsMatrix.emplace_back();
+    //     pixelsMatrix.back().reserve(PIXEL_SIZE);
+
+    //     for (int x = 0; x < PIXEL_SIZE; x++) {
+    //         float color = (x % 100) / 100.0f;
+            
+
+    //         pixels.push_back(pix);
+    //     }
+
+    //     pixelsMatrix.push_back(pixels);
+    // }
+}
+
+SandBox::~SandBox()
 {
 }
 
 void SandBox::Draw() {
+    m_pixelBatchRenderer.Draw(WINDOW_WIDTH, WINDOW_HEIGHT);
+}
 
-   m_shader.Use();
+std::vector<PixelVertex> SandBox::CreatePixelData()
+{
+    PerlinNoise::Init();
 
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    model = glm::scale(model, glm::vec3(50.0f, 50.0f, 1.0f));
-    m_shader.SetMat4("model", model);
+    std::vector<PixelVertex> vertices;
+    vertices.reserve(PIXEL_SIZE * PIXEL_SIZE);
 
-    glm::mat4 view = glm::mat4(1.0f);
-    m_shader.SetMat4("view", view);
+    double frequency = 0.05f;
 
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WINDOW_WIDTH), 0.0f, static_cast<float>(WINDOW_HEIGHT), -1.0f, 1.0f);
-    m_shader.SetMat4("projection", projection);
+    for (int y = 0; y < PIXEL_SIZE; y++) {
+        for (int x = 0; x < PIXEL_SIZE; x++) {
+            double nx = x * frequency;
+            double ny = y * frequency;
 
-    m_rect.SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    m_rect.Draw();
+            double noiseValue = PerlinNoise::Noise(nx, ny);
+
+            float colorValue = static_cast<float>((noiseValue + 1.0f) / 2.0f);
+
+            glm::vec2 pos(x, y);
+            glm::vec4 color(colorValue, colorValue, colorValue, 1.0f);
+
+            vertices.emplace_back(pos, color);
+        }
+    }
+    return vertices;
 }

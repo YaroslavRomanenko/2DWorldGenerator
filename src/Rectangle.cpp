@@ -9,10 +9,10 @@ Rectangle::Rectangle(const glm::vec2& pos, float width, float height, const Shad
     unsigned int VBO, EBO;
 
     float vertices[] = {
-        -0.5f,  0.5f,
-        -0.5f, -0.5f,
-         0.5f,  0.5f,
-         0.5f, -0.5f
+        pos.x,         pos.y,
+        pos.x + width, pos.y,
+        pos.x,         pos.y + height,
+        pos.x + width, pos.y + height
     };
     unsigned int indeces[] = {
         0, 1, 2,

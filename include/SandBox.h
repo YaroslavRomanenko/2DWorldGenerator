@@ -7,23 +7,32 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
+#include <unistd.h>
+#include <vector>
 
 #include "Shader.h"
 #include "Rectangle.h"
+#include "PerlinNoise.h"
+#include "PixelBatchRenderer.h"
 
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 600;
 
 class SandBox {
-private:
-    GLFWwindow* window;
-    Shader m_shader;
-    Rectangle m_rect;
-
 public:
     SandBox();
+    ~SandBox();
 
     void Input();
     void Update(float dt);
     void Draw();
+
+private:
+    GLFWwindow* window;
+    Shader m_shader;
+    Rectangle m_rect;
+    std::vector<PixelVertex> m_pixelVertices;
+    PixelBatchRenderer m_pixelBatchRenderer;
+
+    std::vector<PixelVertex> CreatePixelData(); // Temp
 };
