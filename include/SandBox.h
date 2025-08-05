@@ -23,6 +23,8 @@ public:
     SandBox();
     ~SandBox();
 
+    void RegenerateMap(int seed);
+
     void Input();
     void Update(float dt);
     void Draw();
@@ -31,8 +33,8 @@ private:
     GLFWwindow* window;
     Shader m_shader;
     Rectangle m_rect;
-    std::vector<PixelVertex> m_pixelVertices;
+
     PixelBatchRenderer m_pixelBatchRenderer;
 
-    std::vector<PixelVertex> CreatePixelData(); // Temp
+    std::vector<PixelVertex> CreatePerlinNoisePixelData(int seed); // Temp
 };

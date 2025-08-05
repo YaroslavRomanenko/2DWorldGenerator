@@ -11,6 +11,7 @@
 #include "SandBox.h"
 #include "Shader.h"
 #include "ErrorHandler.h"
+#include "UI/MapConfigurator.h"
 
 const std::string TITLE = "OpenGLSandBox";
 
@@ -49,14 +50,37 @@ int main() {
     SandBox sandBox;
     glm::vec3 colors(0.0f, 0.5f, 0.0f);
 
+    char buffer[256] = {};
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
+
         ProcessInput(window);
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        MapConfigurator::Draw();
+        if (MapConfigurator::RegenerateButtonPressed()) {
+            sandBox.RegenerateMap(MapConfigurator::GetSeed());
+            MapConfigurator::ResetRegenerateButtonPressed();
+        }
         
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         sandBox.Draw();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
         
         glfwSwapBuffers(window);
     }
@@ -84,8 +108,15 @@ void SetUpImGui(GLFWwindow* window) {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     ImGui::StyleColorsDark();
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 420");

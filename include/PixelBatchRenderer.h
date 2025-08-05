@@ -18,11 +18,13 @@ class PixelBatchRenderer {
 public:
     PixelBatchRenderer(const std::vector<PixelVertex>& pixelVertices);
 
+    void UpdateVerticesData(const std::vector<PixelVertex>& pixelVertices);
+
     void Draw(unsigned int windowWidth, unsigned int windowHeight);
 
 private:
-    const std::vector<PixelVertex>& m_pixelVertices;
+    std::vector<PixelVertex> m_pixelVertices;
 
-    unsigned int m_VAO;
+    unsigned int m_VAO, m_VBO;
     Shader m_shader;
 };

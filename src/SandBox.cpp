@@ -6,7 +6,7 @@ unsigned int PIXEL_SIZE = 256; // temp
 
 SandBox::SandBox()
     :  m_shader("../res/shaders/rect.vs", "../res/shaders/rect.fs"), m_rect(glm::vec2(10.0f, 10.0f), 20.0f, 20.0f, m_shader),
-    m_pixelVertices(CreatePixelData()), m_pixelBatchRenderer(m_pixelVertices)
+    m_pixelBatchRenderer(CreatePerlinNoisePixelData(1))
 {
     char buffer[FILENAME_MAX];
     if (getcwd(buffer, sizeof(buffer)) != NULL) {
@@ -15,34 +15,25 @@ SandBox::SandBox()
     else {
         std::cerr << "getcwd() error, cannot figure out the current working directory!";
     }
-
-    // pixelsMatrix.reserve(PIXEL_SIZE);
-    // for (int y = 0; y < PIXEL_SIZE; y++) {
-    //     pixelsMatrix.emplace_back();
-    //     pixelsMatrix.back().reserve(PIXEL_SIZE);
-
-    //     for (int x = 0; x < PIXEL_SIZE; x++) {
-    //         float color = (x % 100) / 100.0f;
-            
-
-    //         pixels.push_back(pix);
-    //     }
-
-    //     pixelsMatrix.push_back(pixels);
-    // }
 }
 
 SandBox::~SandBox()
 {
 }
 
+void SandBox::RegenerateMap(int seed)
+{
+    std::vector<PixelVertex> pixelVertices = CreatePerlinNoisePixelData(seed);
+    m_pixelBatchRenderer.UpdateVerticesData(pixelVertices);
+}
+
 void SandBox::Draw() {
     m_pixelBatchRenderer.Draw(WINDOW_WIDTH, WINDOW_HEIGHT);
 }
 
-std::vector<PixelVertex> SandBox::CreatePixelData()
+std::vector<PixelVertex> SandBox::CreatePerlinNoisePixelData(int seed)
 {
-    PerlinNoise::Init(10);
+    PerlinNoise::Init(seed);
 
     std::vector<PixelVertex> vertices;
     vertices.reserve(PIXEL_SIZE * PIXEL_SIZE);

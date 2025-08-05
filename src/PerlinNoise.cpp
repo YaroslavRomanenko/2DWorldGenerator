@@ -1,13 +1,17 @@
 #include "PerlinNoise.h"
 
+#include <iostream>
 #include <cstdlib>
 #include <cmath>
 
 void PerlinNoise::Init(int seed) {
     srand(seed);
-
-
-    permutation.reserve(512);
+    if (!permutation.empty()) {
+        permutation.clear();
+    } 
+    else {
+        permutation.reserve(512);
+    } 
 
     for (int i = 0; i < 256; i++) {
         permutation.emplace_back(i);
