@@ -62,7 +62,7 @@ int main() {
 
         MapConfigurator::Draw();
         if (MapConfigurator::RegenerateButtonPressed()) {
-            sandBox.RegenerateMap(MapConfigurator::GetSeed());
+            sandBox.RegenerateMap(MapConfigurator::GetSeed(), MapConfigurator::GetAmplitude(), MapConfigurator::GetFrequency());
             MapConfigurator::ResetRegenerateButtonPressed();
         }
         

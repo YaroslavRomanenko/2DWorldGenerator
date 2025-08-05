@@ -56,11 +56,9 @@ double PerlinNoise::Noise(double x, double y)
     return Lerp(u, lerpLeft, lerpRight);
 }
 
-double PerlinNoise::FractalBrownianMotion(double x, double y, int numOctaves)
+double PerlinNoise::FractalBrownianMotion(double x, double y, int numOctaves, double amplitude, double frequency)
 {
     double result = 0.0;
-    double amplitude = 1.0;
-    double frequency = 0.005;
 
     if (numOctaves > 8) {
         numOctaves = 1;

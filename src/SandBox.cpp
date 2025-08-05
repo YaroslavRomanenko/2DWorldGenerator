@@ -21,9 +21,9 @@ SandBox::~SandBox()
 {
 }
 
-void SandBox::RegenerateMap(int seed)
+void SandBox::RegenerateMap(int seed, double amplitude, double frequency)
 {
-    std::vector<PixelVertex> pixelVertices = CreatePerlinNoisePixelData(seed);
+    std::vector<PixelVertex> pixelVertices = CreatePerlinNoisePixelData(seed, amplitude, frequency);
     m_pixelBatchRenderer.UpdateVerticesData(pixelVertices);
 }
 
@@ -31,19 +31,17 @@ void SandBox::Draw() {
     m_pixelBatchRenderer.Draw(WINDOW_WIDTH, WINDOW_HEIGHT);
 }
 
-std::vector<PixelVertex> SandBox::CreatePerlinNoisePixelData(int seed)
+std::vector<PixelVertex> SandBox::CreatePerlinNoisePixelData(int seed, double amplitude, double frequency)
 {
     PerlinNoise::Init(seed);
 
     std::vector<PixelVertex> vertices;
     vertices.reserve(PIXEL_SIZE * PIXEL_SIZE);
 
-    double frequency = 0.05f;
-
     for (int y = 0; y < PIXEL_SIZE; y++) {
         for (int x = 0; x < PIXEL_SIZE; x++) {
 
-            double noiseValue = PerlinNoise::FractalBrownianMotion(x, y, 8);
+            double noiseValue = PerlinNoise::FractalBrownianMotion(x, y, 8, amplitude, frequency);
 
             float colorValue = static_cast<float>((noiseValue + 1.0f) / 2.0f);
 

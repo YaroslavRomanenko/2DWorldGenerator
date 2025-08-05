@@ -23,7 +23,7 @@ public:
     SandBox();
     ~SandBox();
 
-    void RegenerateMap(int seed);
+    void RegenerateMap(int seed, double amplitude = 1.0, double frequency = 0.005);
 
     void Input();
     void Update(float dt);
@@ -36,5 +36,5 @@ private:
 
     PixelBatchRenderer m_pixelBatchRenderer;
 
-    std::vector<PixelVertex> CreatePerlinNoisePixelData(int seed); // Temp
+    std::vector<PixelVertex> CreatePerlinNoisePixelData(int seed, double amplitude = 1.0, double frequency = 0.005);
 };
