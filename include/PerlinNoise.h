@@ -6,8 +6,9 @@
 
 class PerlinNoise {
 public:
-    static void Init();
+    static void Init(int seed);
     static double Noise(double x, double y);
+    static double FractalBrownianMotion(double x, double y, int numOctaves);
 
 private:
     PerlinNoise() { }

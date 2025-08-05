@@ -3,7 +3,10 @@
 #include <cstdlib>
 #include <cmath>
 
-void PerlinNoise::Init() {
+void PerlinNoise::Init(int seed) {
+    srand(seed);
+
+
     permutation.reserve(512);
 
     for (int i = 0; i < 256; i++) {
@@ -47,6 +50,27 @@ double PerlinNoise::Noise(double x, double y)
     double lerpRight = Lerp(v, dotBottomRight, dotTopRight);
 
     return Lerp(u, lerpLeft, lerpRight);
+}
+
+double PerlinNoise::FractalBrownianMotion(double x, double y, int numOctaves)
+{
+    double result = 0.0;
+    double amplitude = 1.0;
+    double frequency = 0.005;
+
+    if (numOctaves > 8) {
+        numOctaves = 1;
+    }
+
+    for (int octave = 0; octave < numOctaves; octave++) {
+        double n = amplitude * Noise(x * frequency, y * frequency);
+        result += n;
+
+        amplitude *= 0.5;
+        frequency *= 2.0;
+    }
+
+    return result;
 }
 
 double PerlinNoise::Fade(double t)

@@ -42,7 +42,7 @@ void SandBox::Draw() {
 
 std::vector<PixelVertex> SandBox::CreatePixelData()
 {
-    PerlinNoise::Init();
+    PerlinNoise::Init(10);
 
     std::vector<PixelVertex> vertices;
     vertices.reserve(PIXEL_SIZE * PIXEL_SIZE);
@@ -51,10 +51,8 @@ std::vector<PixelVertex> SandBox::CreatePixelData()
 
     for (int y = 0; y < PIXEL_SIZE; y++) {
         for (int x = 0; x < PIXEL_SIZE; x++) {
-            double nx = x * frequency;
-            double ny = y * frequency;
 
-            double noiseValue = PerlinNoise::Noise(nx, ny);
+            double noiseValue = PerlinNoise::FractalBrownianMotion(x, y, 8);
 
             float colorValue = static_cast<float>((noiseValue + 1.0f) / 2.0f);
 
