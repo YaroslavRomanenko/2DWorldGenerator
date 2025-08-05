@@ -9,6 +9,9 @@ public:
         ImGui::InputText("Seed", m_buffer, sizeof(m_buffer));
         ImGui::SliderFloat("Amplitude", &m_amplitude, 0.0f, 2.0f);
         ImGui::SliderFloat("Frequency", &m_frequency, 0.0f, 0.05f);
+        ImGui::Separator();
+        ImGui::RadioButton("Default Perlin Noise", &m_mapOption, 0);
+        ImGui::RadioButton("Colored Map", &m_mapOption, 1);
 
         if (ImGui::Button("Regenerate")) {
             m_regenerate = true;
@@ -31,15 +34,18 @@ public:
 
     static double GetAmplitude() { return m_amplitude; };
     static double GetFrequency() { return m_frequency; };
+    static int GetMapType() { return m_mapOption; }
 
 private:
     static char m_buffer[256];
     static bool m_regenerate;
     static float m_amplitude;
     static float m_frequency;
+    static int m_mapOption;
 };
 
 char MapConfigurator::m_buffer[256] = {};
 bool MapConfigurator::m_regenerate = false;
 float MapConfigurator::m_amplitude = 1.0f;
 float MapConfigurator::m_frequency = 0.005f;
+int MapConfigurator::m_mapOption = 0;

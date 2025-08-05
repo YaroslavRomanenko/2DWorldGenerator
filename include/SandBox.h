@@ -18,12 +18,17 @@
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 600;
 
+enum MapType {
+    DefaultMap,
+    ColoredMap
+};
+
 class SandBox {
 public:
     SandBox();
     ~SandBox();
 
-    void RegenerateMap(int seed, double amplitude = 1.0, double frequency = 0.005);
+    void RegenerateMap(int seed, double amplitude, double frequency, MapType type);
 
     void Input();
     void Update(float dt);
@@ -36,5 +41,5 @@ private:
 
     PixelBatchRenderer m_pixelBatchRenderer;
 
-    std::vector<PixelVertex> CreatePerlinNoisePixelData(int seed, double amplitude = 1.0, double frequency = 0.005);
+    std::vector<PixelVertex> CreatePerlinNoisePixelData(int seed = 1, double amplitude = 1.0, double frequency = 0.005, MapType type = DefaultMap);
 };
