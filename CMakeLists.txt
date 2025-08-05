@@ -13,7 +13,10 @@ target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_D
 find_package(OpenGL REQUIRED)
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
+    PUBLIC
+    glad
     imgui
     glfw
+    glm
     OpenGL::GL
 )
