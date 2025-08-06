@@ -16,6 +16,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     PUBLIC
     glad
     imgui
+    stb
     glfw
     glm
     OpenGL::GL

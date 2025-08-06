@@ -15,6 +15,7 @@ public:
     Shader(const std::string& vsFilePath, const std::string& fsFilePath);
 
     void Use();
+    int GetUniformLocation(const std::string& name);
 
     void SetVec4(const std::string& name, const glm::vec4& value);
     void SetVec4(const std::string& name, float x, float y, float z, float w);

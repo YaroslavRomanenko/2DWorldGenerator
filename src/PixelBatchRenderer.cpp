@@ -10,7 +10,6 @@
 PixelBatchRenderer::PixelBatchRenderer(const std::vector<PixelVertex>& pixelVertices)
     : m_pixelVertices(pixelVertices), m_shader("../res/shaders/pixel.vs", "../res/shaders/pixel.fs")
 {
-
     glCheck(glGenVertexArrays(1, &m_VAO);)
     glCheck(glBindVertexArray(m_VAO);)
 

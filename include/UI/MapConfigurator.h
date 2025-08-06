@@ -12,6 +12,7 @@ public:
         ImGui::Separator();
         ImGui::RadioButton("Default Perlin Noise", &m_mapOption, 0);
         ImGui::RadioButton("Colored Map", &m_mapOption, 1);
+        ImGui::RadioButton("TiledMap", &m_mapOption, 2);
 
         if (ImGui::Button("Regenerate")) {
             m_regenerate = true;

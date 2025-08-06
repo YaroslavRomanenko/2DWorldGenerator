@@ -7,4 +7,6 @@ add_executable(${CMAKE_PROJECT_NAME}
     Rectangle.cpp
     SandBox.cpp
     Shader.cpp
+    Texture.cpp
+    TileBatchRenderer.cpp
 )

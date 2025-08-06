@@ -33,19 +33,24 @@ void Shader::Use()
     glCheck(glUseProgram(m_shaderProgram);)
 }
 
-void Shader::SetVec4(const std::string & name, const glm::vec4 & value)
+int Shader::GetUniformLocation(const std::string & name)
 {
-    glCheck(glUniform4fv(glGetUniformLocation(m_shaderProgram, name.c_str()), 1, &value[0]);)
+    return glGetUniformLocation(m_shaderProgram, name.c_str());
+}
+
+void Shader::SetVec4(const std::string& name, const glm::vec4 & value)
+{
+    glCheck(glUniform4fv(GetUniformLocation(name), 1, &value[0]);)
 }
 
 void Shader::SetVec4(const std::string & name, float x, float y, float z, float w)
 {
-    glCheck(glUniform4f(glGetUniformLocation(m_shaderProgram, name.c_str()), x, y, z, w);)
+    glCheck(glUniform4f(GetUniformLocation(name), x, y, z, w);)
 }
 
 void Shader::SetMat4(const std::string & name, const glm::mat4 & value)
 {
-    glCheck(glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram, name.c_str()), 1, GL_FALSE, &value[0][0]);)
+    glCheck(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0][0]);)
 }
 
 std::string Shader::ReadShaderFile(const std::string& shaderFilePath)
