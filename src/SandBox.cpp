@@ -1,14 +1,20 @@
 #include "SandBox.h"
 
-#include <exception>
+#include <stdexcept>
 #include <array>
+
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
+
+#include "UI/MapConfigurator.h"
 
 unsigned int PIXEL_SIZE = 256; // temp
 unsigned int TILES_SIZE = 256; // temp
 
+const std::string TITLE = "OpenGLSandBox";
+
 SandBox::SandBox()
-    :  m_shader("../res/shaders/tile.vs", "../res/shaders/tile.fs"), m_rect(glm::vec2(10.0f, 10.0f), 20.0f, 20.0f, m_shader),
-    m_pixelBatchRenderer(CreatePerlinNoisePixelData()), m_tileBatchRenderer(CreatePerlinNoiseTileData())
 {
     char buffer[FILENAME_MAX];
     if (getcwd(buffer, sizeof(buffer)) != NULL) {
@@ -17,10 +23,25 @@ SandBox::SandBox()
     else {
         std::cerr << "getcwd() error, cannot figure out the current working directory!";
     }
+
+    SetUpGLFW();
+    SetUpGLAD();
+    SetUpImGui();
+
+    m_mapType = DefaultMap;
+
+    m_pixelBatchRenderer = std::make_unique<PixelBatchRenderer>(CreatePerlinNoisePixelData());
+    m_tileBatchRenderer = std::make_unique<TileBatchRenderer>(CreatePerlinNoiseTileData());
+    m_camera = std::make_unique<Camera>();
 }
 
 SandBox::~SandBox()
 {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    glfwTerminate();
 }
 
 void SandBox::RegenerateMap(int seed, double amplitude, double frequency, MapType type)
@@ -28,24 +49,78 @@ void SandBox::RegenerateMap(int seed, double amplitude, double frequency, MapTyp
     m_mapType = type;
     if (m_mapType == DefaultMap || m_mapType == ColoredMap) {
         std::vector<PixelVertex> pixelVertices = CreatePerlinNoisePixelData(seed, amplitude, frequency, type);
-        m_pixelBatchRenderer.UpdateVerticesData(pixelVertices);
+        m_pixelBatchRenderer->UpdateVerticesData(pixelVertices);
     }
     else {
         std::vector<TileVertex> tileVertices = CreatePerlinNoiseTileData(seed, amplitude, frequency, type);
-        m_tileBatchRenderer.UpdateVerticesData(tileVertices);
+        m_tileBatchRenderer->UpdateVerticesData(tileVertices);
     }
 
+}
+
+void SandBox::Start()
+{
+    float deltaTime = 0.0f;
+    float lastFrame = 0.0f;
+
+    char buffer[256] = {};
+
+    while (!glfwWindowShouldClose(m_window)) {
+        glfwPollEvents();
+
+        ProcessInput();
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        MapConfigurator::Draw();
+        if (MapConfigurator::RegenerateButtonPressed()) {
+            int seed = MapConfigurator::GetSeed();
+            float amplitude = MapConfigurator::GetAmplitude();
+            float frequency = MapConfigurator::GetFrequency();
+            MapType type = static_cast<MapType>(MapConfigurator::GetMapType());
+
+            RegenerateMap(seed, amplitude, frequency, type);
+            MapConfigurator::ResetRegenerateButtonPressed();
+        }
+        
+        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+        Update(deltaTime);
+        Draw();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
+        
+        glfwSwapBuffers(m_window);
+    }
 }
 
 void SandBox::Update(float dt)
 {
+    glm::vec2 move(-1.0f * dt, 0.0f);
+    m_camera->Move(move);
 }
 
 void SandBox::Draw() {
     if (m_mapType == DefaultMap || m_mapType == ColoredMap)
-        m_pixelBatchRenderer.Draw(WINDOW_WIDTH, WINDOW_HEIGHT);
+        m_pixelBatchRenderer->Draw(WINDOW_WIDTH, WINDOW_HEIGHT);
     else
-        m_tileBatchRenderer.Draw(WINDOW_WIDTH, WINDOW_HEIGHT);
+        m_tileBatchRenderer->Draw(WINDOW_WIDTH, WINDOW_HEIGHT);
 }
 
 std::vector<PixelVertex> SandBox::CreatePerlinNoisePixelData(int seed, double amplitude, double frequency, MapType type)
@@ -142,4 +217,64 @@ std::vector<TileVertex> SandBox::CreatePerlinNoiseTileData(int seed, double ampl
     }
 
     return vertices;
+}
+
+void SandBox::SetUpGLFW()
+{
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+    m_window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, TITLE.c_str(), NULL, NULL);
+    if (!m_window) {
+        glfwTerminate();
+        throw std::runtime_error("Failed to create GLFW window");
+    }
+    glfwMakeContextCurrent(m_window);
+    glfwSetFramebufferSizeCallback(m_window, frame_buffer_size_callback);
+}
+
+void SandBox::SetUpGLAD()
+{
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        exit(-1);
+    }
+}
+
+void SandBox::SetUpImGui() {
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+    ImGui::StyleColorsDark();
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
+
+    ImGui_ImplGlfw_InitForOpenGL(m_window, true);
+    ImGui_ImplOpenGL3_Init("#version 420");
+}
+
+void SandBox::ProcessInput()
+{
+    if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(m_window, true);
+}
+
+void SandBox::frame_buffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
 }

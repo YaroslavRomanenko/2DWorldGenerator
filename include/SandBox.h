@@ -9,12 +9,13 @@
 #include <iostream>
 #include <unistd.h>
 #include <vector>
+#include <memory>
 
 #include "Shader.h"
-#include "Rectangle.h"
 #include "PerlinNoise.h"
 #include "PixelBatchRenderer.h"
 #include "TileBatchRenderer.h"
+#include "Camera.h"
 
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 600;
@@ -32,19 +33,29 @@ public:
 
     void RegenerateMap(int seed, double amplitude, double frequency, MapType type);
 
+    void Start();
+
     void Input();
     void Update(float dt);
     void Draw();
 
 private:
-    GLFWwindow* window;
-    Shader m_shader;
-    Rectangle m_rect;
+    GLFWwindow* m_window;
 
-    PixelBatchRenderer m_pixelBatchRenderer;
-    TileBatchRenderer m_tileBatchRenderer;
+    std::unique_ptr<PixelBatchRenderer> m_pixelBatchRenderer;
+    std::unique_ptr<TileBatchRenderer> m_tileBatchRenderer;
+    std::unique_ptr<Camera> m_camera;
+    
     MapType m_mapType;
 
     std::vector<PixelVertex> CreatePerlinNoisePixelData(int seed = 1, double amplitude = 1.0, double frequency = 0.005, MapType type = DefaultMap);
     std::vector<TileVertex> CreatePerlinNoiseTileData(int seed = 1, double amplitude = 1.0, double frequency = 0.005, MapType type = DefaultMap);
+
+    void SetUpGLFW();
+    void SetUpGLAD();
+    void SetUpImGui();
+    
+    void ProcessInput();
+
+    static void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
 };
