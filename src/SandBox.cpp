@@ -44,18 +44,18 @@ SandBox::~SandBox()
     glfwTerminate();
 }
 
-void SandBox::RegenerateMap(int seed, double amplitude, double frequency, MapType type)
+void SandBox::RegenerateMap(int seed, int octaves, double amplitude, double frequency, MapType type)
 {
     m_mapType = type;
 
     m_camera->Reset();
 
     if (m_mapType == DefaultMap || m_mapType == ColoredMap) {
-        std::vector<PixelVertex> pixelVertices = CreatePerlinNoisePixelData(seed, amplitude, frequency, type);
+        std::vector<PixelVertex> pixelVertices = CreatePerlinNoisePixelData(seed, octaves, amplitude, frequency, type);
         m_pixelBatchRenderer->UpdateVerticesData(pixelVertices);
     }
     else {
-        std::vector<TileVertex> tileVertices = CreatePerlinNoiseTileData(seed, amplitude, frequency, type);
+        std::vector<TileVertex> tileVertices = CreatePerlinNoiseTileData(seed, octaves, amplitude, frequency, type);
         m_tileBatchRenderer->UpdateVerticesData(tileVertices);
     }
 
@@ -98,11 +98,14 @@ void SandBox::Start()
         MapConfigurator::Draw();
         if (MapConfigurator::RegenerateButtonPressed()) {
             int seed = MapConfigurator::GetSeed();
+
+            int octaves = MapConfigurator::GetOctaves();
             float amplitude = MapConfigurator::GetAmplitude();
             float frequency = MapConfigurator::GetFrequency();
+
             MapType type = static_cast<MapType>(MapConfigurator::GetMapType());
 
-            RegenerateMap(seed, amplitude, frequency, type);
+            RegenerateMap(seed, octaves, amplitude, frequency, type);
             MapConfigurator::ResetRegenerateButtonPressed();
         }
         
@@ -148,7 +151,7 @@ void SandBox::Draw() {
         m_tileBatchRenderer->Draw(*m_camera, WINDOW_WIDTH, WINDOW_HEIGHT);
 }
 
-std::vector<PixelVertex> SandBox::CreatePerlinNoisePixelData(int seed, double amplitude, double frequency, MapType type)
+std::vector<PixelVertex> SandBox::CreatePerlinNoisePixelData(int seed, int octaves, double amplitude, double frequency, MapType type)
 {
     PerlinNoise::Init(seed);
 
@@ -158,7 +161,7 @@ std::vector<PixelVertex> SandBox::CreatePerlinNoisePixelData(int seed, double am
     for (int y = 0; y < PIXEL_SIZE; y++) {
         for (int x = 0; x < PIXEL_SIZE; x++) {
 
-            double noiseValue = PerlinNoise::FractalBrownianMotion(x, y, 8, amplitude, frequency);
+            double noiseValue = PerlinNoise::FractalBrownianMotion(x, y, octaves, amplitude, frequency);
 
             float colorValue = static_cast<float>((noiseValue + 1.0f) / 2.0f);
  
@@ -166,17 +169,20 @@ std::vector<PixelVertex> SandBox::CreatePerlinNoisePixelData(int seed, double am
             glm::vec4 color(colorValue, colorValue, colorValue, 1.0f);
             
             if (type == ColoredMap) {
-                if (colorValue <= 0.2f) {
+                if (colorValue <= 0.3f) {
                     color.r = 0.0f; color.g = 0.0f; color.b = 0.9f;
                 }
                 else if (colorValue <= 0.4f) {
                     color.r = 0.5f; color.g = 0.5f; color.b = 1.0f;
                 }
-                else if (colorValue <= 0.5f) {
+                else if (colorValue <= 0.45f) {
                     color.r = 0.96f; color.g = 0.86f; color.b = 0.74f;
                 }
-                else if (colorValue <= 0.8f) {
+                else if (colorValue <= 0.75f) {
                     color.r = 0.0f, color.g = 0.7f; color.b = 0.0f;
+                }
+                else if (colorValue <= 0.9f) {
+                    color.r = 0.5f; color.g = 0.5f; color.b = 0.5f;
                 }
                 else {
                     color.r = 1.0f; color.g = 1.0f; color.b = 1.0f;
@@ -191,7 +197,7 @@ std::vector<PixelVertex> SandBox::CreatePerlinNoisePixelData(int seed, double am
     return vertices;
 }
 
-std::vector<TileVertex> SandBox::CreatePerlinNoiseTileData(int seed, double amplitude, double frequency, MapType type) {
+std::vector<TileVertex> SandBox::CreatePerlinNoiseTileData(int seed, int octaves, double amplitude, double frequency, MapType type) {
     PerlinNoise::Init(seed);
 
     std::vector<TileVertex> vertices;
@@ -199,7 +205,7 @@ std::vector<TileVertex> SandBox::CreatePerlinNoiseTileData(int seed, double ampl
 
     for (int y = 0; y < TILES_SIZE; y++) {
         for (int x = 0; x < TILES_SIZE; x++) { 
-            double noiseValue = PerlinNoise::FractalBrownianMotion(x, y, 8, amplitude, frequency);
+            double noiseValue = PerlinNoise::FractalBrownianMotion(x, y, octaves, amplitude, frequency);
 
             float colorValue = static_cast<float>((noiseValue + 1.0f) / 2.0f);
 
@@ -212,16 +218,16 @@ std::vector<TileVertex> SandBox::CreatePerlinNoiseTileData(int seed, double ampl
 
             float textureId;
 
-            if (colorValue <= 0.2f) {
+            if (colorValue <= 0.3f) {
                 textureId = 0.0f;
             }
             else if (colorValue <= 0.4f) {
                 textureId = 1.0f;
             }
-            else if (colorValue <= 0.5f) {
+            else if (colorValue <= 0.45f) {
                 textureId = 2.0f;
             }
-            else if (colorValue <= 0.8f) {
+            else if (colorValue <= 0.75f) {
                 textureId = 3.0f;
             }
             else if (colorValue <= 0.9f) {

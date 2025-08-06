@@ -34,7 +34,7 @@ void PixelBatchRenderer::UpdateVerticesData(const std::vector<PixelVertex>& pixe
     m_pixelVertices = pixelVertices;
 
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_VBO);)
-    glBufferSubData(GL_ARRAY_BUFFER, 0, m_pixelVertices.size() * sizeof(PixelVertex), m_pixelVertices.data());
+    glCheck(glBufferSubData(GL_ARRAY_BUFFER, 0, m_pixelVertices.size() * sizeof(PixelVertex), m_pixelVertices.data());)
 }
 
 void PixelBatchRenderer::Draw(unsigned int windowWidth, unsigned int windowHeight) {

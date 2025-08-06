@@ -31,7 +31,7 @@ public:
     SandBox();
     ~SandBox();
 
-    void RegenerateMap(int seed, double amplitude, double frequency, MapType type);
+    void RegenerateMap(int seed, int octaves, double amplitude, double frequency, MapType type);
 
     void Start();
 
@@ -48,8 +48,8 @@ private:
     
     MapType m_mapType;
 
-    std::vector<PixelVertex> CreatePerlinNoisePixelData(int seed = 1, double amplitude = 1.0, double frequency = 0.005, MapType type = DefaultMap);
-    std::vector<TileVertex> CreatePerlinNoiseTileData(int seed = 1, double amplitude = 1.0, double frequency = 0.005, MapType type = DefaultMap);
+    std::vector<PixelVertex> CreatePerlinNoisePixelData(int seed = 1, int octaves = 8, double amplitude = 1.0, double frequency = 0.005, MapType type = DefaultMap);
+    std::vector<TileVertex> CreatePerlinNoiseTileData(int seed = 1, int octaves = 8, double amplitude = 1.0, double frequency = 0.005, MapType type = DefaultMap);
 
     void SetUpGLFW();
     void SetUpGLAD();
