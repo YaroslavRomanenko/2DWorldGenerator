@@ -47,6 +47,9 @@ SandBox::~SandBox()
 void SandBox::RegenerateMap(int seed, double amplitude, double frequency, MapType type)
 {
     m_mapType = type;
+
+    m_camera->Reset();
+
     if (m_mapType == DefaultMap || m_mapType == ColoredMap) {
         std::vector<PixelVertex> pixelVertices = CreatePerlinNoisePixelData(seed, amplitude, frequency, type);
         m_pixelBatchRenderer->UpdateVerticesData(pixelVertices);
@@ -84,6 +87,12 @@ void SandBox::Start()
             RegenerateMap(seed, amplitude, frequency, type);
             MapConfigurator::ResetRegenerateButtonPressed();
         }
+        double xPos, yPos;
+        glfwGetCursorPos(m_window, &xPos, &yPos);
+
+        std::string text = "";
+        text = "mouseXPos: " + std::to_string(xPos) + " | mouseYPos: " + std::to_string(yPos);
+        MapConfigurator::SetTextToShow(text);
         
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -112,15 +121,23 @@ void SandBox::Start()
 
 void SandBox::Update(float dt)
 {
-    glm::vec2 move(-1.0f * dt, 0.0f);
-    m_camera->Move(move);
+    if (glm::length(m_camera->GetMoveDirection()) > 0.0f) {
+        glm::vec2 direction = glm::normalize(m_camera->GetMoveDirection());
+
+        float cameraSpeed = m_camera->GetCameraSpeed();
+        if (m_camera->GetAccelerate()) cameraSpeed *= 2;
+
+        glm::vec2 velocity = direction * cameraSpeed * dt;
+
+        m_camera->Move(velocity);
+    } 
 }
 
 void SandBox::Draw() {
     if (m_mapType == DefaultMap || m_mapType == ColoredMap)
         m_pixelBatchRenderer->Draw(WINDOW_WIDTH, WINDOW_HEIGHT);
     else
-        m_tileBatchRenderer->Draw(WINDOW_WIDTH, WINDOW_HEIGHT);
+        m_tileBatchRenderer->Draw(*m_camera, WINDOW_WIDTH, WINDOW_HEIGHT);
 }
 
 std::vector<PixelVertex> SandBox::CreatePerlinNoisePixelData(int seed, double amplitude, double frequency, MapType type)
@@ -236,8 +253,11 @@ void SandBox::SetUpGLFW()
         glfwTerminate();
         throw std::runtime_error("Failed to create GLFW window");
     }
+    glfwSetWindowUserPointer(m_window, this);
+
     glfwMakeContextCurrent(m_window);
     glfwSetFramebufferSizeCallback(m_window, frame_buffer_size_callback);
+    glfwSetScrollCallback(m_window, scroll_callback);
 }
 
 void SandBox::SetUpGLAD()
@@ -272,9 +292,45 @@ void SandBox::ProcessInput()
 {
     if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(m_window, true);
+
+    m_camera->ResetMoveDirection();
+    m_camera->SetAccelerate(false);
+
+    glm::vec2 moveDirection(0.0f);
+
+    if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
+        moveDirection.y += 1.0f;
+    if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
+        moveDirection.y -= 1.0f;
+    if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
+        moveDirection.x += 1.0f;
+    if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
+        moveDirection.x -= 1.0f;
+    if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(m_window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
+        m_camera->SetAccelerate(true);
+
+    m_camera->SetMoveDirection(moveDirection);
 }
 
 void SandBox::frame_buffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+}
+
+void SandBox::ScrollCallbackImpl(double yOffset)
+{
+    double xPos, yPos;
+    glfwGetCursorPos(m_window, &xPos, &yPos);
+    yPos = WINDOW_HEIGHT - yPos;
+    glm::vec2 mousePos = glm::vec2(static_cast<float>(xPos), static_cast<float>(yPos));
+
+    m_camera->AdjustZoom(static_cast<float>(yOffset), mousePos, glm::vec2(WINDOW_WIDTH, WINDOW_HEIGHT));
+}
+
+void SandBox::scroll_callback(GLFWwindow* window, double xOffset, double yOffset)
+{
+    SandBox* instance = static_cast<SandBox*>(glfwGetWindowUserPointer(window));
+    if (instance) {
+        instance->ScrollCallbackImpl(yOffset);
+    }
 }

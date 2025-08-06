@@ -3,6 +3,7 @@
 
 #include "Shader.h"
 #include "Texture.h"
+#include "Camera.h"
 
 struct TileVertex {
     glm::vec2 position;
@@ -16,7 +17,7 @@ public:
 
     void UpdateVerticesData(const std::vector<TileVertex>& tileVertices);
 
-    void Draw(unsigned int windowWidth, unsigned int windowHeight);
+    void Draw(const Camera& camera, unsigned int windowWidth, unsigned int windowHeight);
 
 private:
     std::vector<TileVertex> m_tileVertices;

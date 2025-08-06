@@ -58,4 +58,6 @@ private:
     void ProcessInput();
 
     static void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
+    void ScrollCallbackImpl(double yOffset);
+    static void scroll_callback(GLFWwindow* window, double xOffset, double yOffset);
 };

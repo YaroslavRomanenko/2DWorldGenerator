@@ -37,7 +37,7 @@ void TileBatchRenderer::UpdateVerticesData(const std::vector<TileVertex>& tileVe
     glBufferSubData(GL_ARRAY_BUFFER, 0, m_tileVertices.size() * sizeof(TileVertex), m_tileVertices.data());
 }
 
-void TileBatchRenderer::Draw(unsigned int windowWidth, unsigned int windowHeight) {
+void TileBatchRenderer::Draw(const Camera& camera, unsigned int windowWidth, unsigned int windowHeight) {
     m_shader.Use();
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_deepWaterTex.GetTextureId());
@@ -55,7 +55,7 @@ void TileBatchRenderer::Draw(unsigned int windowWidth, unsigned int windowHeight
     glm::mat4 model = glm::mat4(1.0f);
     m_shader.SetMat4("model", model);
 
-    glm::mat4 view = glm::mat4(1.0f);
+    glm::mat4 view = camera.GetViewMatrix();
     m_shader.SetMat4("view", view);
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(windowWidth), 0.0f, static_cast<float>(windowHeight), -1.0f, 1.0f);

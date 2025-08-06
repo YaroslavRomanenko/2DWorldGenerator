@@ -17,6 +17,9 @@ public:
         if (ImGui::Button("Regenerate")) {
             m_regenerate = true;
         }
+        
+        ImGui::Separator();
+        ImGui::Text(textToShow.c_str());
 
         ImGui::End();
     }
@@ -37,7 +40,10 @@ public:
     static double GetFrequency() { return m_frequency; };
     static int GetMapType() { return m_mapOption; }
 
+    static void SetTextToShow(const std::string& value) { textToShow = value; }
+
 private:
+    static std::string textToShow;
     static char m_buffer[256];
     static bool m_regenerate;
     static float m_amplitude;
@@ -45,6 +51,7 @@ private:
     static int m_mapOption;
 };
 
+std::string MapConfigurator::textToShow = "";
 char MapConfigurator::m_buffer[256] = {};
 bool MapConfigurator::m_regenerate = false;
 float MapConfigurator::m_amplitude = 1.0f;
