@@ -1,3 +1,7 @@
+![Static Badge](https://img.shields.io/badge/C%2B%2B-14-blue)
+![Static Badge](https://img.shields.io/badge/OpenGl-4.2-lightblue)
+![Static Badge](https://img.shields.io/badge/License-MIT-lightblue)
+
 # 2D World Generator
 
 ![Project Screenshot](docs/images/MapGeneratorConfigs.gif)
