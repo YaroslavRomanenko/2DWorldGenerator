@@ -19,7 +19,7 @@ public:
         }
         
         ImGui::Separator();
-        ImGui::Text(textToShow.c_str());
+        ImGui::Text("%s", textToShow.c_str());
 
         ImGui::End();
     }

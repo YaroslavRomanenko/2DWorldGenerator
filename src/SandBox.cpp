@@ -63,15 +63,33 @@ void SandBox::RegenerateMap(int seed, double amplitude, double frequency, MapTyp
 
 void SandBox::Start()
 {
+    float lastFrameTime = 0.0f;
+    int frameCount = 0;
+    double previousFPSTime = glfwGetTime();
+
     float deltaTime = 0.0f;
-    float lastFrame = 0.0f;
 
     char buffer[256] = {};
+
 
     while (!glfwWindowShouldClose(m_window)) {
         glfwPollEvents();
 
         ProcessInput();
+
+        double currentFrameTime = glfwGetTime();
+        deltaTime = static_cast<float>(currentFrameTime - lastFrameTime);
+        lastFrameTime = currentFrameTime;
+
+        frameCount++;
+        
+        if (currentFrameTime - previousFPSTime >= 1.0) {
+            std::string fpsText = "FPS: " + std::to_string(frameCount);
+            MapConfigurator::SetTextToShow(fpsText);
+
+            frameCount = 0;
+            previousFPSTime = currentFrameTime;
+        }
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -87,19 +105,9 @@ void SandBox::Start()
             RegenerateMap(seed, amplitude, frequency, type);
             MapConfigurator::ResetRegenerateButtonPressed();
         }
-        double xPos, yPos;
-        glfwGetCursorPos(m_window, &xPos, &yPos);
-
-        std::string text = "";
-        text = "mouseXPos: " + std::to_string(xPos) + " | mouseYPos: " + std::to_string(yPos);
-        MapConfigurator::SetTextToShow(text);
         
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
-        float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
 
         Update(deltaTime);
         Draw();
