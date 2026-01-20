@@ -3,7 +3,9 @@ include(FetchContent)
 FetchContent_Declare(
     imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
-    GIT_TAG docking
+    GIT_TAG        docking
+    GIT_SHALLOW    TRUE
+    GIT_PROGRESS   TRUE
 )
 
 FetchContent_MakeAvailable(imgui)
@@ -28,3 +30,5 @@ target_sources(
     ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
     ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
 )
+
+target_link_libraries(imgui PUBLIC glfw) 

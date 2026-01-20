@@ -17,7 +17,7 @@
 #include "TileBatchRenderer.h"
 #include "Camera.h"
 
-const unsigned int WINDOW_WIDTH = 800;
+const unsigned int WINDOW_WIDTH = 600;
 const unsigned int WINDOW_HEIGHT = 600;
 
 enum MapType {
